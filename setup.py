@@ -18,6 +18,6 @@ setup(
         ],
     },
     package_data={
-        'orthofetch': ['calvary_cross.txt'],
+        'orthofetch': ['logos/*.txt'],
     },
 )

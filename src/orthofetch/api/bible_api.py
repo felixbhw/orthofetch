@@ -4,6 +4,15 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass
 
 @dataclass
+class Verse:
+    content: str
+
+@dataclass
+class Reading:
+    display: str
+    passage: List[Verse]
+
+@dataclass
 class SystemInfo:
     hostname: str
     cpu: str
@@ -13,13 +22,8 @@ class SystemInfo:
 class OrthodoxData:
     date: str
     title: str
-    readings: List[str]
+    readings: List[Reading]
     saints: List[str]
-
-@dataclass
-class DisplayData:
-    system: SystemInfo
-    orthodox: OrthodoxData
 
 class OrthoCalAPI:
     BASE_URL = "https://orthocal.info/api"
@@ -41,8 +45,21 @@ class OrthoCalAPI:
             
             readings = []
             for idx in data.get('abbreviated_reading_indices', []):
-                reading = data['readings'][idx]
-                readings.append(reading['display'])
+                reading_data = data['readings'][idx]
+                verses = []
+                
+                # Ensure we have passage data and handle potential missing content
+                if 'passage' in reading_data and isinstance(reading_data['passage'], list):
+                    verses = [
+                        Verse(content=verse.get('content', ''))
+                        for verse in reading_data['passage']
+                        if isinstance(verse, dict) and verse.get('content')
+                    ]
+                
+                readings.append(Reading(
+                    display=reading_data.get('display', ''),
+                    passage=verses
+                ))
             
             saints = [story['title'] for story in data.get('stories', [])]
             
