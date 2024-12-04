@@ -16,34 +16,58 @@ console = Console()
 
 def parse_system_info(raw_info: List[str]) -> SystemInfo:
     """Parse fastfetch output into structured data"""
-    system = {"hostname": "", "cpu": "", "gpus": []}
+    system = {
+        "hostname": "", "cpu": "", "gpus": [], "kernel": "", "os": "",
+        "de": "", "wm": "", "terminal": "", "shell": "", "packages": "",
+        "memory": "", "uptime": "", "resolution": "", "theme": "",
+        "icons": "", "font": "", "cursor": ""
+    }
+    
+    field_mapping = {
+        "@": "hostname",
+        "CPU": "cpu",
+        "GPU": "gpus",
+        "Kernel": "kernel",
+        "OS": "os",
+        "DE": "de",
+        "WM": "wm",
+        "Terminal": "terminal",
+        "Shell": "shell",
+        "Packages": "packages",
+        "Memory": "memory",
+        "Uptime": "uptime",
+        "Resolution": "resolution",
+        "Theme": "theme",
+        "Icons": "icons",
+        "Font": "font",
+        "Cursor": "cursor"
+    }
     
     for line in raw_info:
-        if "@" in line:
-            system["hostname"] = line.strip()
-        elif "CPU" in line:
-            system["cpu"] = line.replace("CPU", "").strip()
-        elif "GPU" in line:
-            system["gpus"].append(line.replace("GPU", "").strip())
+        for key, field in field_mapping.items():
+            if key in line:
+                if field == "gpus":
+                    system["gpus"].append(line.replace("GPU", "").strip())
+                else:
+                    system[field] = line.replace(key, "").strip()
     
-    return SystemInfo(
-        hostname=system["hostname"],
-        cpu=system["cpu"],
-        gpus=system["gpus"]
-    )
+    return SystemInfo(**system)
 
 def collect_system_info() -> SystemInfo:
     """Collect system information from fastfetch"""
     try:
         result = subprocess.run(
-            ['fastfetch', '-l', 'none', '-s', 'title:time:cpu:gpu'],
+            ['fastfetch', '-l', 'none', '--load-config', 'none', '--structure', 
+             'title:kernel:os:de:wm:terminal:shell:packages:memory:cpu:gpu:uptime:resolution:theme:icons:font:cursor'],
             capture_output=True,
             text=True,
             check=True
         )
         return parse_system_info(result.stdout.strip().split('\n'))
     except (subprocess.CalledProcessError, FileNotFoundError):
-        return SystemInfo("Unknown", "Unknown", [])
+        return SystemInfo("Unknown", "Unknown", [], "Unknown", "Unknown", "Unknown", 
+                        "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown",
+                        "Unknown", "Unknown", "Unknown", "Unknown", "Unknown")
 
 @click.command()
 @click.option('--verse-only', is_flag=True, help='Show only Bible verse')
@@ -51,7 +75,7 @@ def collect_system_info() -> SystemInfo:
 @click.option('--no-system', is_flag=True, help='Skip system information')
 @click.option('--logo', type=click.Choice(['calvary_cross', 'orthodox_cross', 'dove']), 
               default='calvary_cross', help='Select logo to display')
-@click.option('--preset', type=click.Choice(['default', 'epistle']), 
+@click.option('--preset', type=click.Choice(['default', 'epistle', 'system']), 
               default='default', help='Select display preset')
 def main(verse_only, saints_only, no_system, logo, preset):
     """Orthodox Christian system fetch tool"""

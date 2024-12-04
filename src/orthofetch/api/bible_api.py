@@ -17,6 +17,20 @@ class SystemInfo:
     hostname: str
     cpu: str
     gpus: List[str]
+    kernel: str
+    os: str
+    de: str
+    wm: str
+    terminal: str
+    shell: str
+    packages: str
+    memory: str
+    uptime: str
+    resolution: str
+    theme: str
+    icons: str
+    font: str
+    cursor: str
 
 @dataclass
 class OrthodoxData:

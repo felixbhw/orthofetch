@@ -2,6 +2,7 @@ from typing import Dict, Type
 from .base import BasePreset
 from .default import DefaultPreset
 from .epistle import EpistlePreset
+from .system import SystemPreset
 
 class PresetManager:
     def __init__(self):
@@ -12,6 +13,7 @@ class PresetManager:
         """Register built-in presets"""
         self.register_preset(DefaultPreset)
         self.register_preset(EpistlePreset)
+        self.register_preset(SystemPreset)
 
     def register_preset(self, preset_class: Type[BasePreset]):
         """Register a new preset"""
